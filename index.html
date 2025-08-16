@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DEEP/VOID - Digital Arts Collective</title>
+    <title>ARCHIVE435 - Digital Arts Collective</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -68,7 +68,7 @@
             top: 0;
             pointer-events: none;
             transform: translate(-50%, -50%);
-            transition: width 0.1s, height 0.1s, border-color 0.1s;
+            transition: width 0.1s, height 0.1s, border-color 0.1s, background-color 0.1s;
             z-index: 10001;
         }
 
@@ -76,6 +76,18 @@
             width: 30px;
             height: 30px;
             border-color: var(--primary-glitch);
+        }
+        
+        .cursor.text-input {
+            width: 4px;
+            height: 25px;
+            border-radius: 0;
+            background-color: var(--off-white);
+            animation: caret-blink 1s infinite;
+        }
+        
+        @keyframes caret-blink {
+            50% { opacity: 0; }
         }
 
         .trail {
@@ -181,6 +193,8 @@
             opacity: 0; /* Initially hidden */
             transform: scale(0.9);
             animation: fadeIn 0.5s forwards;
+            display: flex; /* Use flexbox for layout */
+            flex-direction: column;
         }
 
         @keyframes fadeIn {
@@ -201,6 +215,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0; /* Prevent header from shrinking */
         }
 
         .window-controls {
@@ -218,6 +233,8 @@
 
         .window-content {
             padding: 20px;
+            flex-grow: 1; /* Allow content to fill available space */
+            overflow-y: auto; /* Add scrollbar if content overflows */
         }
 
         .window-content h2 {
@@ -250,50 +267,52 @@
 
         /*
         ==========================================================================
-        NAVIGATION / MENU
+        TERMINAL / COMMAND LINE
         ==========================================================================
         */
-        .main-nav {
+        .terminal {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 100;
-        }
-
-        .nav-button {
-            border: 1px solid var(--off-white);
-            padding: 10px 15px;
-            font-family: 'VT323', monospace;
-            font-size: 1.5rem;
-            background: transparent;
-            color: var(--off-white);
-            position: relative;
-        }
-        
-        .nav-button:hover::before, .nav-button:hover::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
+            bottom: 0;
             left: 0;
-            background: var(--off-white);
-            z-index: -1;
-            animation: glitch-btn 0.3s forwards;
+            width: 100%;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.8);
+            border-top: 1px solid var(--off-white);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            padding: 10px;
+            font-family: 'Roboto Mono', monospace;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
         }
 
-        .nav-button:hover::after {
-            background: var(--primary-glitch);
-            animation-delay: 0.05s;
+        .terminal-output {
+            flex-grow: 1;
+            color: var(--off-white);
         }
 
-        @keyframes glitch-btn {
-            0% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
-            20% { clip-path: polygon(0 10%, 100% 0, 100% 90%, 0 100%); }
-            40% { clip-path: polygon(0 0, 100% 20%, 100% 100%, 0 80%); }
-            60% { clip-path: polygon(0 30%, 100% 10%, 100% 70%, 0 100%); }
-            80% { clip-path: polygon(0 0, 100% 40%, 100% 100%, 0 60%); }
-            100% { clip-path: polygon(0 20%, 100% 0, 100% 80%, 0 100%); }
+        .terminal-output div {
+            white-space: pre-wrap; /* Preserve whitespace and wrap text */
+        }
+
+        .terminal-input-line {
+            display: flex;
+        }
+
+        .terminal-prompt {
+            color: var(--secondary-glitch);
+            margin-right: 10px;
+        }
+
+        .terminal-input {
+            background: transparent;
+            border: none;
+            color: var(--off-white);
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1rem;
+            flex-grow: 1;
+            outline: none;
         }
 
     </style>
@@ -306,7 +325,7 @@
     <!-- Main title in the center -->
     <header class="main-header">
         <div class="glitch-container">
-            <h1 class="glitch" data-text="DEEP/VOID">
+            <h1 class="glitch" data-text="ARCHIVE435">
                 ARCHIVE435
                 <span>ARCHIVE435</span>
                 <span>ARCHIVE435</span>
@@ -355,10 +374,14 @@
         </div>
     </main>
 
-    <!-- Navigation -->
-    <nav class="main-nav">
-        
-    </nav>
+    <!-- Terminal Navigation -->
+    <div class="terminal" id="terminal">
+        <div class="terminal-output" id="terminal-output"></div>
+        <div class="terminal-input-line">
+            <span class="terminal-prompt">&gt;</span>
+            <input type="text" class="terminal-input" id="terminal-input" autofocus>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -368,12 +391,10 @@
             // =========================================================================
             const cursor = document.querySelector('.cursor');
             
-            // Update cursor position
             document.addEventListener('mousemove', e => {
                 cursor.setAttribute('style', `top: ${e.pageY}px; left: ${e.pageX}px;`);
             });
 
-            // Create mouse trail effect
             document.addEventListener('mousemove', e => {
                 const trail = document.createElement('div');
                 trail.className = 'trail';
@@ -381,15 +402,22 @@
                 trail.style.left = `${e.pageX}px`;
                 trail.style.top = `${e.pageY}px`;
                 setTimeout(() => {
-                    document.body.removeChild(trail);
-                }, 500); // Trail element is removed after animation
+                    if (document.body.contains(trail)) {
+                        document.body.removeChild(trail);
+                    }
+                }, 500);
             });
             
-            // Add hover effect to cursor
             const interactiveElements = document.querySelectorAll('a, button, .close, .window-header');
             interactiveElements.forEach(el => {
                 el.addEventListener('mouseover', () => cursor.classList.add('hover'));
                 el.addEventListener('mouseout', () => cursor.classList.remove('hover'));
+            });
+            
+            const textInputs = document.querySelectorAll('input[type="text"]');
+            textInputs.forEach(el => {
+                el.addEventListener('mouseover', () => cursor.classList.add('text-input'));
+                el.addEventListener('mouseout', () => cursor.classList.remove('text-input'));
             });
 
 
@@ -398,14 +426,12 @@
             // =========================================================================
             const windows = document.querySelectorAll('.draggable-window');
             let activeWindow = null;
-            let highestZIndex = 2; // Start above the header
+            let highestZIndex = 2;
 
             windows.forEach(windowEl => {
                 const header = windowEl.querySelector('.window-header');
 
-                // Function to make a window active (bring to front)
                 const activateWindow = (e) => {
-                    // Bring this window to the front
                     highestZIndex++;
                     windowEl.style.zIndex = highestZIndex;
                     activeWindow = windowEl;
@@ -413,15 +439,15 @@
 
                 windowEl.addEventListener('mousedown', activateWindow);
                 header.addEventListener('mousedown', (e) => {
-                    activateWindow(); // Ensure it's active on drag start
+                    activateWindow();
                     
                     let offsetX = e.clientX - parseInt(window.getComputedStyle(windowEl).left);
                     let offsetY = e.clientY - parseInt(window.getComputedStyle(windowEl).top);
 
                     function mouseMoveHandler(e) {
-                        if (!activeWindow) return;
-                        activeWindow.style.top = (e.clientY - offsetY) + 'px';
-                        activeWindow.style.left = (e.clientX - offsetX) + 'px';
+                        if (!activeWindow || activeWindow !== windowEl) return;
+                        windowEl.style.top = (e.clientY - offsetY) + 'px';
+                        windowEl.style.left = (e.clientX - offsetX) + 'px';
                     }
 
                     function mouseUpHandler() {
@@ -433,14 +459,92 @@
                     document.addEventListener('mouseup', mouseUpHandler);
                 });
 
-                // Close button functionality
                 const closeButton = windowEl.querySelector('.close');
                 if (closeButton) {
                     closeButton.addEventListener('click', (e) => {
-                        e.stopPropagation(); // Prevent mousedown on window from firing
+                        e.stopPropagation();
                         windowEl.style.display = 'none';
                     });
                 }
+            });
+            
+            // =========================================================================
+            // TERMINAL LOGIC
+            // =========================================================================
+            const terminal = document.getElementById('terminal');
+            const terminalOutput = document.getElementById('terminal-output');
+            const terminalInput = document.getElementById('terminal-input');
+
+            const printToTerminal = (text, isCommand = false) => {
+                const line = document.createElement('div');
+                if (isCommand) {
+                    line.innerHTML = `<span class="terminal-prompt">&gt;</span> ${text}`;
+                } else {
+                    line.textContent = text;
+                }
+                terminalOutput.appendChild(line);
+                terminal.scrollTop = terminal.scrollHeight; // Auto-scroll to bottom
+            };
+            
+            const executeCommand = (cmd) => {
+                const parts = cmd.toLowerCase().split(' ');
+                const command = parts[0];
+                const arg = parts[1];
+
+                switch(command) {
+                    case 'help':
+                        printToTerminal('Available commands:');
+                        printToTerminal('  help          - Shows this list of commands');
+                        printToTerminal('  open [name]   - Opens a window (artist1, artist2, about)');
+                        printToTerminal('  close [name]  - Closes a window (artist1, artist2, about)');
+                        printToTerminal('  show all      - Makes all windows visible');
+                        printToTerminal('  clear         - Clears the terminal');
+                        break;
+                    case 'open':
+                    case 'close':
+                        const targetWindow = document.getElementById(arg);
+                        if (targetWindow) {
+                            targetWindow.style.display = command === 'open' ? 'flex' : 'none';
+                            printToTerminal(`Window '${arg}' ${command === 'open' ? 'opened' : 'closed'}.`);
+                        } else {
+                            printToTerminal(`Error: Window '${arg}' not found.`);
+                        }
+                        break;
+                    case 'show':
+                         if (arg === 'all') {
+                            windows.forEach(w => w.style.display = 'flex');
+                            printToTerminal('All windows are now visible.');
+                        } else {
+                            printToTerminal(`Error: Unknown argument '${arg}'. Did you mean 'show all'?`);
+                        }
+                        break;
+                    case 'clear':
+                        terminalOutput.innerHTML = '';
+                        break;
+                    default:
+                        printToTerminal(`Error: Command not found '${cmd}'`);
+                        break;
+                }
+            };
+
+            terminalInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const command = terminalInput.value.trim();
+                    if (command) {
+                        printToTerminal(command, true);
+                        executeCommand(command);
+                        terminalInput.value = '';
+                    }
+                }
+            });
+            
+            // Welcome message in terminal
+            printToTerminal('ARCHIVE435 Terminal v1.0');
+            printToTerminal('Type "help" to see available commands.');
+
+            // Click on terminal to focus input
+            terminal.addEventListener('click', () => {
+                terminalInput.focus();
             });
         });
     </script>
