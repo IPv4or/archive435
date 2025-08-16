@@ -32,7 +32,7 @@
             background-color: var(--black);
             color: var(--off-white);
             font-family: 'Roboto Mono', monospace;
-            overflow: hidden; /* Prevent scrollbars from the chaotic layout */
+            overflow: hidden; /* Prevent scrollbars on desktop */
             height: 100vh;
             width: 100vw;
         }
@@ -169,7 +169,7 @@
 
         /*
         ==========================================================================
-        LAYOUT & DRAGGABLE WINDOWS
+        LAYOUT & DRAGGABLE WINDOWS (DESKTOP)
         ==========================================================================
         */
         .main-header {
@@ -314,6 +314,66 @@
             flex-grow: 1;
             outline: none;
         }
+        
+        /*
+        ==========================================================================
+        MOBILE RESPONSIVE STYLES
+        ==========================================================================
+        */
+        @media (max-width: 768px) {
+            * {
+                cursor: default; /* Revert to default cursor on mobile */
+            }
+
+            body {
+                overflow: auto; /* Allow scrolling on mobile */
+            }
+
+            /* Hide desktop-only cursor effects */
+            .cursor, .trail {
+                display: none !important;
+            }
+
+            .main-header {
+                position: relative; /* Change from absolute to relative */
+                top: auto;
+                left: auto;
+                transform: none;
+                text-align: center;
+                padding: 40px 10px 20px 10px;
+            }
+
+            .glitch {
+                font-size: 3rem; /* Reduce title font size */
+            }
+
+            main {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding-bottom: 150px; /* Add padding to not be covered by terminal */
+            }
+
+            .draggable-window {
+                position: relative; /* No longer absolute */
+                top: auto !important; /* Override inline styles from JS */
+                left: auto !important; /* Override inline styles from JS */
+                width: 90%;
+                margin-bottom: 20px;
+                resize: none; /* Disable resizing */
+                animation: none; /* Disable fade-in to show immediately */
+                opacity: 1;
+                transform: none;
+            }
+
+            .window-header {
+                cursor: default; /* No 'move' cursor on mobile */
+            }
+
+            .terminal {
+                height: 140px; /* Make terminal smaller on mobile */
+            }
+        }
 
     </style>
 </head>
@@ -322,7 +382,7 @@
     <!-- Custom cursor element -->
     <div class="cursor"></div>
 
-    <!-- Main title in the center -->
+    <!-- Main title -->
     <header class="main-header">
         <div class="glitch-container">
             <h1 class="glitch" data-text="ARCHIVE435">
@@ -385,81 +445,91 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-
-            // =========================================================================
-            // CUSTOM CURSOR & MOUSE TRAIL LOGIC
-            // =========================================================================
-            const cursor = document.querySelector('.cursor');
             
-            document.addEventListener('mousemove', e => {
-                cursor.setAttribute('style', `top: ${e.pageY}px; left: ${e.pageX}px;`);
-            });
-
-            document.addEventListener('mousemove', e => {
-                const trail = document.createElement('div');
-                trail.className = 'trail';
-                document.body.appendChild(trail);
-                trail.style.left = `${e.pageX}px`;
-                trail.style.top = `${e.pageY}px`;
-                setTimeout(() => {
-                    if (document.body.contains(trail)) {
-                        document.body.removeChild(trail);
-                    }
-                }, 500);
-            });
-            
-            const interactiveElements = document.querySelectorAll('a, button, .close, .window-header');
-            interactiveElements.forEach(el => {
-                el.addEventListener('mouseover', () => cursor.classList.add('hover'));
-                el.addEventListener('mouseout', () => cursor.classList.remove('hover'));
-            });
-            
-            const textInputs = document.querySelectorAll('input[type="text"]');
-            textInputs.forEach(el => {
-                el.addEventListener('mouseover', () => cursor.classList.add('text-input'));
-                el.addEventListener('mouseout', () => cursor.classList.remove('text-input'));
-            });
-
+            // Check if it's a touch device to disable some features
+            const isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
             // =========================================================================
-            // DRAGGABLE WINDOW LOGIC
+            // CUSTOM CURSOR & MOUSE TRAIL LOGIC (Desktop Only)
             // =========================================================================
-            const windows = document.querySelectorAll('.draggable-window');
-            let activeWindow = null;
-            let highestZIndex = 2;
-
-            windows.forEach(windowEl => {
-                const header = windowEl.querySelector('.window-header');
-
-                const activateWindow = (e) => {
-                    highestZIndex++;
-                    windowEl.style.zIndex = highestZIndex;
-                    activeWindow = windowEl;
-                };
-
-                windowEl.addEventListener('mousedown', activateWindow);
-                header.addEventListener('mousedown', (e) => {
-                    activateWindow();
-                    
-                    let offsetX = e.clientX - parseInt(window.getComputedStyle(windowEl).left);
-                    let offsetY = e.clientY - parseInt(window.getComputedStyle(windowEl).top);
-
-                    function mouseMoveHandler(e) {
-                        if (!activeWindow || activeWindow !== windowEl) return;
-                        windowEl.style.top = (e.clientY - offsetY) + 'px';
-                        windowEl.style.left = (e.clientX - offsetX) + 'px';
-                    }
-
-                    function mouseUpHandler() {
-                        document.removeEventListener('mousemove', mouseMoveHandler);
-                        document.removeEventListener('mouseup', mouseUpHandler);
-                    }
-
-                    document.addEventListener('mousemove', mouseMoveHandler);
-                    document.addEventListener('mouseup', mouseUpHandler);
+            if (!isTouchDevice()) {
+                const cursor = document.querySelector('.cursor');
+                
+                document.addEventListener('mousemove', e => {
+                    cursor.setAttribute('style', `top: ${e.pageY}px; left: ${e.pageX}px;`);
                 });
 
-                const closeButton = windowEl.querySelector('.close');
+                document.addEventListener('mousemove', e => {
+                    const trail = document.createElement('div');
+                    trail.className = 'trail';
+                    document.body.appendChild(trail);
+                    trail.style.left = `${e.pageX}px`;
+                    trail.style.top = `${e.pageY}px`;
+                    setTimeout(() => {
+                        if (document.body.contains(trail)) {
+                            document.body.removeChild(trail);
+                        }
+                    }, 500);
+                });
+                
+                const interactiveElements = document.querySelectorAll('a, button, .close, .window-header');
+                interactiveElements.forEach(el => {
+                    el.addEventListener('mouseover', () => cursor.classList.add('hover'));
+                    el.addEventListener('mouseout', () => cursor.classList.remove('hover'));
+                });
+                
+                const textInputs = document.querySelectorAll('input[type="text"]');
+                textInputs.forEach(el => {
+                    el.addEventListener('mouseover', () => cursor.classList.add('text-input'));
+                    el.addEventListener('mouseout', () => cursor.classList.remove('text-input'));
+                });
+            }
+
+
+            // =========================================================================
+            // DRAGGABLE WINDOW LOGIC (Desktop Only)
+            // =========================================================================
+            if (!isTouchDevice()) {
+                const windows = document.querySelectorAll('.draggable-window');
+                let activeWindow = null;
+                let highestZIndex = 2;
+
+                windows.forEach(windowEl => {
+                    const header = windowEl.querySelector('.window-header');
+
+                    const activateWindow = (e) => {
+                        highestZIndex++;
+                        windowEl.style.zIndex = highestZIndex;
+                        activeWindow = windowEl;
+                    };
+
+                    windowEl.addEventListener('mousedown', activateWindow);
+                    header.addEventListener('mousedown', (e) => {
+                        activateWindow();
+                        
+                        let offsetX = e.clientX - parseInt(window.getComputedStyle(windowEl).left);
+                        let offsetY = e.clientY - parseInt(window.getComputedStyle(windowEl).top);
+
+                        function mouseMoveHandler(e) {
+                            if (!activeWindow || activeWindow !== windowEl) return;
+                            windowEl.style.top = (e.clientY - offsetY) + 'px';
+                            windowEl.style.left = (e.clientX - offsetX) + 'px';
+                        }
+
+                        function mouseUpHandler() {
+                            document.removeEventListener('mousemove', mouseMoveHandler);
+                            document.removeEventListener('mouseup', mouseUpHandler);
+                        }
+
+                        document.addEventListener('mousemove', mouseMoveHandler);
+                        document.addEventListener('mouseup', mouseUpHandler);
+                    });
+                });
+            }
+            
+            // Close button functionality works on all devices
+            document.querySelectorAll('.draggable-window .close').forEach(closeButton => {
+                const windowEl = closeButton.closest('.draggable-window');
                 if (closeButton) {
                     closeButton.addEventListener('click', (e) => {
                         e.stopPropagation();
@@ -512,7 +582,7 @@
                         break;
                     case 'show':
                          if (arg === 'all') {
-                            windows.forEach(w => w.style.display = 'flex');
+                            document.querySelectorAll('.draggable-window').forEach(w => w.style.display = 'flex');
                             printToTerminal('All windows are now visible.');
                         } else {
                             printToTerminal(`Error: Unknown argument '${arg}'. Did you mean 'show all'?`);
