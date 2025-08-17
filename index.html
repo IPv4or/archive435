@@ -3,620 +3,521 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARCHIVE435 - Digital Arts Collective</title>
+    <title>ARCHIVE435</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /*
-        ==========================================================================
-        CORE STYLES & AESTHETICS
-        ==========================================================================
-        */
+        /* Custom CSS for the avant-garde aesthetic */
         :root {
-            --black: #050505;
-            --off-white: #e0e0e0;
-            --primary-glitch: #ff00ff; /* Magenta */
-            --secondary-glitch: #00ffff; /* Cyan */
-            --background-noise: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOCIgbnVtT2N0YXZlcz0iMyIgc3RpdGNoVGlsZXM9InN0aXRjaCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNub2lzZSkiLz48L3N2Zz4=');
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            cursor: none; /* We will use a custom cursor */
+            --bg-color: #101010;
+            --text-color: #F0F0F0;
+            --accent-color: #FF00FF; /* Default accent, will be overridden per artist */
         }
 
         body {
-            background-color: var(--black);
-            color: var(--off-white);
-            font-family: 'Roboto Mono', monospace;
-            overflow: hidden; /* Prevent scrollbars on desktop */
-            height: 100vh;
-            width: 100vw;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'IBM Plex Mono', monospace;
+            overflow: hidden; /* Prevent scrolling on the main body */
         }
 
-        /* Scanlines & Noise Overlay: Creates a CRT monitor effect */
-        body::after {
+        /* Typography */
+        .font-headline { font-family: 'Anton', sans-serif; }
+        .font-body { font-family: 'IBM Plex Mono', monospace; }
+
+        /* Glitch & Scanlines */
+        .glitch-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(255, 255, 255, 0.03),
+                rgba(255, 255, 255, 0.03) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 100;
+            animation: flicker 0.15s infinite;
+        }
+
+        /* Page Transition Overlay */
+        #transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 999;
+            pointer-events: none;
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            grid-template-rows: repeat(20, 1fr);
+        }
+        .transition-pixel {
+            background-color: var(--bg-color);
+            opacity: 0;
+        }
+
+        /* --- NEW HOMEPAGE STYLES --- */
+        #home-page {
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            position: relative; /* Establish stacking context */
+            z-index: 10; /* Sit above inactive pages */
+        }
+        .artist-link-card {
+            width: 100%;
+            max-width: 600px;
+            border: 1px solid rgba(240, 240, 240, 0.3);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+        .artist-link-card:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+        .artist-link-card:hover .glitch-text {
+            animation: text-glitch 0.3s infinite;
+        }
+        .artist-link-card::before,
+        .artist-link-card::after {
             content: '';
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            background-color: var(--accent-color);
+            left: 0;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        .artist-link-card::before {
+            top: 5px;
+            transform-origin: left;
+        }
+        .artist-link-card::after {
+            bottom: 5px;
+            transform-origin: right;
+        }
+        .artist-link-card:hover::before,
+        .artist-link-card:hover::after {
+            transform: scaleX(1);
+        }
+        
+        /* --- END NEW HOMEPAGE STYLES --- */
+        
+        /* Artist Page Styles */
+        .artist-page {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none;
-            background: repeating-linear-gradient(0deg, rgba(255,255,255,0.03), rgba(255,255,255,0.03) 1px, transparent 1px, transparent 2px),
-                        var(--background-noise);
-            opacity: 0.3;
-            z-index: 9999;
-            animation: flicker 0.15s infinite;
-        }
-
-        /*
-        ==========================================================================
-        CUSTOM CURSOR & MOUSE TRAIL
-        ==========================================================================
-        */
-        .cursor {
-            position: fixed;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--off-white);
-            border-radius: 50%;
-            left: 0;
-            top: 0;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-            transition: width 0.1s, height 0.1s, border-color 0.1s, background-color 0.1s;
-            z-index: 10001;
-        }
-
-        .cursor.hover {
-            width: 30px;
-            height: 30px;
-            border-color: var(--primary-glitch);
-        }
-        
-        .cursor.text-input {
-            width: 4px;
-            height: 25px;
-            border-radius: 0;
-            background-color: var(--off-white);
-            animation: caret-blink 1s infinite;
-        }
-        
-        @keyframes caret-blink {
-            50% { opacity: 0; }
-        }
-
-        .trail {
-            position: fixed;
-            width: 6px;
-            height: 6px;
-            background: var(--off-white);
-            border-radius: 50%;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-            z-index: 10000;
-            opacity: 0.8;
-            animation: fadeOut 0.5s forwards;
-        }
-
-        @keyframes fadeOut {
-            to {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0);
-            }
-        }
-
-        /*
-        ==========================================================================
-        GLITCH EFFECT ON TEXT
-        ==========================================================================
-        */
-        .glitch-container {
-            position: relative;
-        }
-        
-        .glitch {
-            font-family: 'VT323', monospace;
-            font-size: 6rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            position: relative;
-            color: var(--off-white);
-            text-shadow: 0.05em 0 0 rgba(255, 0, 255, 0.75),
-                         -0.025em -0.05em 0 rgba(0, 255, 255, 0.75),
-                         0.025em 0.05em 0 rgba(0, 255, 0, 0.75);
-            animation: glitch-fx 5s infinite;
-        }
-
-        .glitch span {
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        .glitch span:first-child {
-            animation: glitch-fx 4s infinite;
-            clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
-            transform: translate(-0.025em, -0.0125em);
-            opacity: 0.8;
-        }
-
-        .glitch span:last-child {
-            animation: glitch-fx 2.5s infinite;
-            clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
-            transform: translate(0.025em, 0.0125em);
-            opacity: 0.8;
-        }
-
-        @keyframes glitch-fx {
-            0% { text-shadow: 0.05em 0 0 var(--primary-glitch), -0.05em 0 0 var(--secondary-glitch); }
-            14% { text-shadow: 0.05em 0 0 var(--primary-glitch), -0.05em 0 0 var(--secondary-glitch); }
-            15% { text-shadow: -0.05em -0.025em 0 var(--primary-glitch), 0.025em 0.025em 0 var(--secondary-glitch); }
-            49% { text-shadow: -0.05em -0.025em 0 var(--primary-glitch), 0.025em 0.025em 0 var(--secondary-glitch); }
-            50% { text-shadow: 0.025em 0.05em 0 var(--primary-glitch), 0.05em 0 0 var(--secondary-glitch); }
-            99% { text-shadow: 0.025em 0.05em 0 var(--primary-glitch), 0.05em 0 0 var(--secondary-glitch); }
-            100% { text-shadow: -0.025em 0 0 var(--primary-glitch), -0.025em -0.05em 0 var(--secondary-glitch); }
-        }
-        
-        @keyframes flicker {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.5; }
-        }
-
-        /*
-        ==========================================================================
-        LAYOUT & DRAGGABLE WINDOWS (DESKTOP)
-        ==========================================================================
-        */
-        .main-header {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1;
-        }
-
-        .draggable-window {
-            position: absolute;
-            background: rgba(10, 10, 10, 0.8);
-            border: 1px solid var(--off-white);
-            backdrop-filter: blur(5px);
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            min-width: 300px;
-            min-height: 200px;
-            resize: both;
-            overflow: auto;
-            opacity: 0; /* Initially hidden */
-            transform: scale(0.9);
-            animation: fadeIn 0.5s forwards;
-            display: flex; /* Use flexbox for layout */
-            flex-direction: column;
-        }
-
-        @keyframes fadeIn {
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .window-header {
-            background: var(--off-white);
-            color: var(--black);
-            padding: 5px 10px;
-            font-family: 'VT323', monospace;
-            font-size: 1.2rem;
-            cursor: move;
-            user-select: none;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0; /* Prevent header from shrinking */
-        }
-
-        .window-controls {
-            display: flex;
-            gap: 5px;
-        }
-
-        .window-controls span {
-            width: 12px;
-            height: 12px;
-            border: 1px solid var(--black);
-            display: block;
-        }
-        .window-controls .close { background: var(--primary-glitch); cursor: pointer; }
-
-        .window-content {
-            padding: 20px;
-            flex-grow: 1; /* Allow content to fill available space */
-            overflow-y: auto; /* Add scrollbar if content overflows */
-        }
-
-        .window-content h2 {
-            font-family: 'VT323', monospace;
-            color: var(--primary-glitch);
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-        
-        .window-content p {
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-        
-        .window-content a {
-            color: var(--secondary-glitch);
-            text-decoration: none;
-            border-bottom: 1px dashed var(--secondary-glitch);
-            transition: color 0.2s, background 0.2s;
-        }
-        .window-content a:hover {
-            background: var(--secondary-glitch);
-            color: var(--black);
-        }
-
-        /* Initial positions for the windows */
-        #artist1 { top: 15vh; left: 10vw; animation-delay: 0.2s; }
-        #artist2 { top: 25vh; left: 55vw; animation-delay: 0.4s; }
-        #about { top: 60vh; left: 30vw; animation-delay: 0.6s; }
-
-        /*
-        ==========================================================================
-        TERMINAL / COMMAND LINE
-        ==========================================================================
-        */
-        .terminal {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 200px;
-            background: rgba(0, 0, 0, 0.8);
-            border-top: 1px solid var(--off-white);
-            backdrop-filter: blur(5px);
-            z-index: 100;
-            padding: 10px;
-            font-family: 'Roboto Mono', monospace;
-            display: flex;
-            flex-direction: column;
             overflow-y: auto;
+            overflow-x: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            z-index: -1; /* BUGFIX: Keep inactive pages in the back */
         }
-
-        .terminal-output {
-            flex-grow: 1;
-            color: var(--off-white);
+        .artist-page.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 50; /* BUGFIX: Bring the active page to the very front */
         }
-
-        .terminal-output div {
-            white-space: pre-wrap; /* Preserve whitespace and wrap text */
+        .sticky-header {
+            background-color: rgba(16, 16, 16, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(240, 240, 240, 0.2);
         }
-
-        .terminal-input-line {
-            display: flex;
-        }
-
-        .terminal-prompt {
-            color: var(--secondary-glitch);
-            margin-right: 10px;
-        }
-
-        .terminal-input {
-            background: transparent;
-            border: none;
-            color: var(--off-white);
-            font-family: 'Roboto Mono', monospace;
-            font-size: 1rem;
-            flex-grow: 1;
-            outline: none;
+        .back-button:hover .skull {
+            animation: skull-glitch 0.5s infinite;
         }
         
-        /*
-        ==========================================================================
-        MOBILE RESPONSIVE STYLES
-        ==========================================================================
-        */
-        @media (max-width: 768px) {
-            * {
-                cursor: default; /* Revert to default cursor on mobile */
-            }
+        /* On-scroll animations */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-            body {
-                overflow: auto; /* Allow scrolling on mobile */
-            }
-
-            /* Hide desktop-only cursor effects */
-            .cursor, .trail {
-                display: none !important;
-            }
-
-            .main-header {
-                position: relative; /* Change from absolute to relative */
-                top: auto;
-                left: auto;
-                transform: none;
-                text-align: center;
-                padding: 40px 10px 20px 10px;
-            }
-
-            .glitch {
-                font-size: 3rem; /* Reduce title font size */
-            }
-
-            main {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                padding-bottom: 150px; /* Add padding to not be covered by terminal */
-            }
-
-            .draggable-window {
-                position: relative; /* No longer absolute */
-                top: auto !important; /* Override inline styles from JS */
-                left: auto !important; /* Override inline styles from JS */
-                width: 90%;
-                margin-bottom: 20px;
-                resize: none; /* Disable resizing */
-                animation: none; /* Disable fade-in to show immediately */
-                opacity: 1;
-                transform: none;
-            }
-
-            .window-header {
-                cursor: default; /* No 'move' cursor on mobile */
-            }
-
-            .terminal {
-                height: 140px; /* Make terminal smaller on mobile */
-            }
+        /* Keyframes for animations */
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        @keyframes text-glitch {
+            0% { transform: translate(0, 0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0, 0); }
+        }
+        @keyframes skull-glitch {
+            0%, 100% { transform: skew(0); color: var(--text-color); }
+            25% { transform: skew(10deg); color: var(--accent-color); }
+            75% { transform: skew(-10deg); color: var(--accent-color); }
         }
 
     </style>
 </head>
-<body>
+<body class="bg-black">
 
-    <!-- Custom cursor element -->
-    <div class="cursor"></div>
+    <!-- Static overlays for aesthetic -->
+    <div class="glitch-overlay"></div>
+    <div id="transition-overlay"></div>
 
-    <!-- Main title -->
-    <header class="main-header">
-        <div class="glitch-container">
-            <h1 class="glitch" data-text="ARCHIVE435">
-                ARCHIVE435
-                <span>ARCHIVE435</span>
-                <span>ARCHIVE435</span>
-            </h1>
-        </div>
-    </header>
+    <!-- Main container for pages -->
+    <main id="app-container">
 
-    <main>
-        <!-- Draggable Window for Artist 1 -->
-        <div class="draggable-window" id="artist1">
-            <div class="window-header">
-                <span>[Artist_Feature_01.sys]</span>
-                <div class="window-controls"><span></span><span></span><span class="close"></span></div>
-            </div>
-            <div class="window-content">
-                <h2>// ARVISO...</h2>
-                <p>A local artist hailing from CACHE VALLEY, catch them repping their native heritage and the valley</p>
-                <a href="#" target="_blank">Listen Now &gt;&gt;</a>
-            </div>
+        <!-- HOME / LANDING PAGE (New Vertical Feed Design) -->
+        <div id="home-page" class="w-full h-screen relative">
+            <!-- Artist link cards will be dynamically injected here -->
         </div>
 
-        <!-- Draggable Window for Artist 2 -->
-        <div class="draggable-window" id="artist2">
-            <div class="window-header">
-                <span>[Artist_Feature_02.sys]</span>
-                <div class="window-controls"><span></span><span></span><span class="close"></span></div>
-            </div>
-            <div class="window-content">
-                <h2>// GR23VY</h2>
-                <p>Lakeside baby.........</p>
-                <a href="#" target="_blank">Listen Here &gt;&gt;</a>
-            </div>
+        <!-- ARTIST PAGES CONTAINER -->
+        <div id="artist-pages-container">
+            <!-- Artist pages will be dynamically generated here -->
         </div>
 
-        <!-- Draggable Window for About/Info -->
-        <div class="draggable-window" id="about">
-            <div class="window-header">
-                <span>[README.txt]</span>
-                <div class="window-controls"><span></span><span></span><span class="close"></span></div>
-            </div>
-            <div class="window-content">
-                <h2>// ABOUT US</h2>
-                <p>a showcase of local artists, what more you need to know</p>
-                <a href="#" target="_blank">Submit Your Work &gt;&gt;</a>
-            </div>
-        </div>
     </main>
 
-    <!-- Terminal Navigation -->
-    <div class="terminal" id="terminal">
-        <div class="terminal-output" id="terminal-output"></div>
-        <div class="terminal-input-line">
-            <span class="terminal-prompt">&gt;</span>
-            <input type="text" class="terminal-input" id="terminal-input" autofocus>
-        </div>
-    </div>
-
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            
-            // Check if it's a touch device to disable some features
-            const isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    document.addEventListener('DOMContentLoaded', () => {
 
-            // =========================================================================
-            // CUSTOM CURSOR & MOUSE TRAIL LOGIC (Desktop Only)
-            // =========================================================================
-            if (!isTouchDevice()) {
-                const cursor = document.querySelector('.cursor');
-                
-                document.addEventListener('mousemove', e => {
-                    cursor.setAttribute('style', `top: ${e.pageY}px; left: ${e.pageX}px;`);
-                });
-
-                document.addEventListener('mousemove', e => {
-                    const trail = document.createElement('div');
-                    trail.className = 'trail';
-                    document.body.appendChild(trail);
-                    trail.style.left = `${e.pageX}px`;
-                    trail.style.top = `${e.pageY}px`;
-                    setTimeout(() => {
-                        if (document.body.contains(trail)) {
-                            document.body.removeChild(trail);
-                        }
-                    }, 500);
-                });
-                
-                const interactiveElements = document.querySelectorAll('a, button, .close, .window-header');
-                interactiveElements.forEach(el => {
-                    el.addEventListener('mouseover', () => cursor.classList.add('hover'));
-                    el.addEventListener('mouseout', () => cursor.classList.remove('hover'));
-                });
-                
-                const textInputs = document.querySelectorAll('input[type="text"]');
-                textInputs.forEach(el => {
-                    el.addEventListener('mouseover', () => cursor.classList.add('text-input'));
-                    el.addEventListener('mouseout', () => cursor.classList.remove('text-input'));
-                });
-            }
-
-
-            // =========================================================================
-            // DRAGGABLE WINDOW LOGIC (Desktop Only)
-            // =========================================================================
-            if (!isTouchDevice()) {
-                const windows = document.querySelectorAll('.draggable-window');
-                let activeWindow = null;
-                let highestZIndex = 2;
-
-                windows.forEach(windowEl => {
-                    const header = windowEl.querySelector('.window-header');
-
-                    const activateWindow = (e) => {
-                        highestZIndex++;
-                        windowEl.style.zIndex = highestZIndex;
-                        activeWindow = windowEl;
-                    };
-
-                    windowEl.addEventListener('mousedown', activateWindow);
-                    header.addEventListener('mousedown', (e) => {
-                        activateWindow();
-                        
-                        let offsetX = e.clientX - parseInt(window.getComputedStyle(windowEl).left);
-                        let offsetY = e.clientY - parseInt(window.getComputedStyle(windowEl).top);
-
-                        function mouseMoveHandler(e) {
-                            if (!activeWindow || activeWindow !== windowEl) return;
-                            windowEl.style.top = (e.clientY - offsetY) + 'px';
-                            windowEl.style.left = (e.clientX - offsetX) + 'px';
-                        }
-
-                        function mouseUpHandler() {
-                            document.removeEventListener('mousemove', mouseMoveHandler);
-                            document.removeEventListener('mouseup', mouseUpHandler);
-                        }
-
-                        document.addEventListener('mousemove', mouseMoveHandler);
-                        document.addEventListener('mouseup', mouseUpHandler);
-                    });
-                });
-            }
-            
-            // Close button functionality works on all devices
-            document.querySelectorAll('.draggable-window .close').forEach(closeButton => {
-                const windowEl = closeButton.closest('.draggable-window');
-                if (closeButton) {
-                    closeButton.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        windowEl.style.display = 'none';
-                    });
+        // --- DATA STRUCTURE ---
+        const artists = [
+            {
+                id: 'void-runner',
+                name: 'VoidRunner',
+                accentColor: '#00FFFF', // Cyan
+                bio: 'A digital phantom haunting the datastreams, VoidRunner’s work is a commentary on the ephemeral nature of digital identity. Using corrupted data and fragmented code, they construct landscapes that are both beautiful and deeply unsettling, questioning the reality of our online existence.',
+                quote: 'WE ARE THE GHOSTS IN THE MACHINE.',
+                links: {
+                    twitter: '#',
+                    instagram: '#',
+                    website: '#'
                 }
-            });
-            
-            // =========================================================================
-            // TERMINAL LOGIC
-            // =========================================================================
-            const terminal = document.getElementById('terminal');
-            const terminalOutput = document.getElementById('terminal-output');
-            const terminalInput = document.getElementById('terminal-input');
+            },
+            {
+                id: 'glitch-witch',
+                name: 'GlitchWitch',
+                accentColor: '#FF00FF', // Magenta
+                bio: 'GlitchWitch summons art from the chaos of system errors and hardware failure. Her process involves circuit-bending old consoles and capturing the resulting visual cacophony. Each piece is a ritual, a spell cast in the language of broken electronics.',
+                quote: 'BEAUTY IS A BUG, NOT A FEATURE.',
+                links: {
+                    twitter: '#',
+                    instagram: '#',
+                    website: '#'
+                }
+            },
+            {
+                id: 'syntax-terror',
+                name: 'SyntaxTerror',
+                accentColor: '#00FF00', // Lime
+                bio: 'A poet of the command line, SyntaxTerror crafts generative art using esoteric programming languages. Their work explores the intersection of language, logic, and anarchy. The output is often raw text, arranged in patterns that feel both alien and deeply human.',
+                quote: 'COMPILING REVOLUTION, ONE LINE AT A TIME.',
+                links: {
+                    twitter: '#',
+                    instagram: '#',
+                    website: '#'
+                }
+            },
+             {
+                id: 'binary-bard',
+                name: 'BinaryBard',
+                accentColor: '#FFFF00', // Yellow
+                bio: 'BinaryBard tells stories using only 1s and 0s, creating massive, intricate bitmap murals that reveal complex narratives upon close inspection. Their work is a testament to the power of the simplest possible language to convey the most complex ideas.',
+                quote: 'EVERYTHING IS EITHER ON OR OFF.',
+                links: {
+                    twitter: '#',
+                    instagram: '#',
+                    website: '#'
+                }
+            }
+        ];
 
-            const printToTerminal = (text, isCommand = false) => {
-                const line = document.createElement('div');
-                if (isCommand) {
-                    line.innerHTML = `<span class="terminal-prompt">&gt;</span> ${text}`;
+        // --- DOM ELEMENT REFERENCES ---
+        const homePage = document.getElementById('home-page');
+        const artistPagesContainer = document.getElementById('artist-pages-container');
+        const transitionOverlay = document.getElementById('transition-overlay');
+        
+        // --- STATE MANAGEMENT ---
+        let currentPage = 'home';
+        let currentArtistIndex = -1;
+        let isTransitioning = false;
+
+        // --- DYNAMIC RENDERING ---
+
+        /**
+         * Renders the new home page with a vertical feed of artist cards.
+         */
+        function renderHomePage() {
+            homePage.innerHTML = ''; // Clear previous content
+            
+            // Add a header for the feed
+            const header = document.createElement('h1');
+            header.className = 'font-headline text-2xl text-center my-4 text-gray-500 tracking-widest';
+            header.textContent = '// ARCHIVE435 //';
+            homePage.appendChild(header);
+
+            artists.forEach((artist, index) => {
+                const card = document.createElement('div');
+                card.className = 'artist-link-card';
+                card.dataset.artistIndex = index;
+                card.style.setProperty('--accent-color', artist.accentColor);
+
+                // Create varied layouts for visual interest
+                if (index % 2 === 0) {
+                     card.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <span class="font-body text-gray-400">ID: 0${index + 1}</span>
+                            <h2 class="glitch-text font-headline text-4xl md:text-5xl text-right">${artist.name}</h2>
+                        </div>
+                    `;
                 } else {
-                    line.textContent = text;
+                    card.innerHTML = `
+                        <h2 class="glitch-text font-headline text-4xl md:text-5xl">${artist.name}</h2>
+                        <p class="font-body text-gray-400 text-right mt-2">STATUS: ONLINE</p>
+                    `;
                 }
-                terminalOutput.appendChild(line);
-                terminal.scrollTop = terminal.scrollHeight; // Auto-scroll to bottom
-            };
+                
+                card.addEventListener('click', () => showArtistPage(index));
+                homePage.appendChild(card);
+            });
+        }
+        
+        /**
+         * Renders all artist pages from the data array.
+         */
+        function renderArtistPages() {
+            artistPagesContainer.innerHTML = '';
+            artists.forEach(artist => {
+                const page = document.createElement('article');
+                page.id = `artist-${artist.id}`;
+                page.className = 'artist-page';
+                page.style.setProperty('--accent-color', artist.accentColor);
+                page.innerHTML = `
+                    <!-- Sticky Header -->
+                    <header class="sticky-header sticky top-0 left-0 w-full p-4 flex justify-between items-center z-50">
+                        <button class="back-button p-2">
+                            <svg class="skull w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path><path d="M12 6c-1.478 0-2.707 1.013-3.164 2.373-.11.316-.015.663.24.883.255.22.611.231.876.028.398-.304.87-.484 1.378-.484s.98.18 1.378.484c.265.203.621.192.876-.028.255-.22.35-.567.24-.883C14.707 7.013 13.478 6 12 6zm-4 6c-.552 0-1 .449-1 1s.448 1 1 1h8c.552 0 1-.449 1-1s-.448-1-1-1H8zm1 4c0 .551.448 1 1 1h4c.552 0 1-.449 1-1v-1H9v1z"></path></svg>
+                        </button>
+                        <h2 class="font-headline text-2xl tracking-wider">${artist.name}</h2>
+                        <div class="w-8"></div> <!-- Spacer -->
+                    </header>
+
+                    <div class="p-4 md:p-8 space-y-12">
+                        <!-- Hero Section -->
+                        <section class="scroll-animate">
+                            <!-- HERO IMAGE FOR ${artist.name} GOES HERE -->
+                            <div class="w-full h-64 bg-black border-2" style="border-color: var(--accent-color); box-shadow: 0 0 15px var(--accent-color);">
+                                <div class="w-full h-full flex items-center justify-center font-body text-gray-500">// HERO_IMG_PLACEHOLDER</div>
+                            </div>
+                        </section>
+
+                        <!-- Bio Section -->
+                        <section class="scroll-animate">
+                            <p class="font-body text-lg leading-relaxed">${artist.bio}</p>
+                        </section>
+
+                        <!-- Pull Quote Section -->
+                        <section class="scroll-animate">
+                            <blockquote class="font-headline text-4xl md:text-6xl text-center tracking-wide py-8" style="color: var(--accent-color); text-shadow: 0 0 10px var(--accent-color);">
+                                "${artist.quote}"
+                            </blockquote>
+                        </section>
+
+                        <!-- Gallery Section -->
+                        <section class="scroll-animate">
+                             <h3 class="font-headline text-3xl mb-4" style="color: var(--accent-color);">GALLERY</h3>
+                            <!-- SWIPEABLE IMAGE GALLERY GOES HERE -->
+                            <div class="w-full h-80 bg-black border" style="border-color: rgba(240, 240, 240, 0.3);">
+                                <div class="w-full h-full flex items-center justify-center font-body text-gray-500">// GALLERY_PLACEHOLDER</div>
+                            </div>
+                        </section>
+
+                        <!-- Links Section -->
+                        <section class="scroll-animate">
+                            <div class="flex justify-center items-center gap-4">
+                                <a href="${artist.links.twitter}" class="font-headline text-xl p-2 border border-transparent hover:border-current" style="--accent-color: inherit;">Twitter</a>
+                                <a href="${artist.links.instagram}" class="font-headline text-xl p-2 border border-transparent hover:border-current" style="--accent-color: inherit;">Instagram</a>
+                                <a href="${artist.links.website}" class="font-headline text-xl p-2 border border-transparent hover:border-current" style="--accent-color: inherit;">Website</a>
+                            </div>
+                        </section>
+                    </div>
+                `;
+                artistPagesContainer.appendChild(page);
+                page.querySelector('.back-button').addEventListener('click', showHomePage);
+            });
+        }
+
+
+        // --- NAVIGATION & PAGE TRANSITIONS ---
+
+        function playTransition(onComplete) {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            transitionOverlay.innerHTML = '';
+
+            for (let i = 0; i < 400; i++) {
+                const pixel = document.createElement('div');
+                pixel.className = 'transition-pixel';
+                transitionOverlay.appendChild(pixel);
+            }
+
+            const pixels = Array.from(transitionOverlay.children);
+            const shuffledPixels = pixels.sort(() => 0.5 - Math.random());
+
+            shuffledPixels.forEach((pixel, i) => {
+                setTimeout(() => {
+                    pixel.style.opacity = '1';
+                    pixel.style.backgroundColor = artists[currentArtistIndex > -1 ? currentArtistIndex : Math.floor(Math.random() * artists.length)].accentColor;
+                }, i * 1.5);
+            });
+
+            setTimeout(() => {
+                onComplete();
+                shuffledPixels.forEach((pixel, i) => {
+                    setTimeout(() => {
+                        pixel.style.opacity = '0';
+                    }, 500 + i * 1.5);
+                });
+                setTimeout(() => {
+                    isTransitioning = false;
+                }, 500 + (pixels.length * 1.5));
+            }, (pixels.length * 1.5));
+        }
+
+        function showHomePage() {
+            if (currentPage === 'home' || isTransitioning) return;
+            playTransition(() => {
+                const activePage = document.querySelector('.artist-page.active');
+                if (activePage) activePage.classList.remove('active');
+                homePage.style.display = 'flex';
+                currentPage = 'home';
+                currentArtistIndex = -1;
+                window.location.hash = '';
+            });
+        }
+
+        function showArtistPage(index) {
+            if (index === currentArtistIndex || isTransitioning) return;
             
-            const executeCommand = (cmd) => {
-                const parts = cmd.toLowerCase().split(' ');
-                const command = parts[0];
-                const arg = parts[1];
+            currentArtistIndex = index;
 
-                switch(command) {
-                    case 'help':
-                        printToTerminal('Available commands:');
-                        printToTerminal('  help          - Shows this list of commands');
-                        printToTerminal('  open [name]   - Opens a window (artist1, artist2, about)');
-                        printToTerminal('  close [name]  - Closes a window (artist1, artist2, about)');
-                        printToTerminal('  show all      - Makes all windows visible');
-                        printToTerminal('  clear         - Clears the terminal');
-                        break;
-                    case 'open':
-                    case 'close':
-                        const targetWindow = document.getElementById(arg);
-                        if (targetWindow) {
-                            targetWindow.style.display = command === 'open' ? 'flex' : 'none';
-                            printToTerminal(`Window '${arg}' ${command === 'open' ? 'opened' : 'closed'}.`);
-                        } else {
-                            printToTerminal(`Error: Window '${arg}' not found.`);
-                        }
-                        break;
-                    case 'show':
-                         if (arg === 'all') {
-                            document.querySelectorAll('.draggable-window').forEach(w => w.style.display = 'flex');
-                            printToTerminal('All windows are now visible.');
-                        } else {
-                            printToTerminal(`Error: Unknown argument '${arg}'. Did you mean 'show all'?`);
-                        }
-                        break;
-                    case 'clear':
-                        terminalOutput.innerHTML = '';
-                        break;
-                    default:
-                        printToTerminal(`Error: Command not found '${cmd}'`);
-                        break;
+            playTransition(() => {
+                const pages = document.querySelectorAll('.artist-page');
+                pages.forEach(p => p.classList.remove('active'));
+
+                const newPage = document.getElementById(`artist-${artists[index].id}`);
+                if (newPage) {
+                    newPage.classList.add('active');
+                    newPage.scrollTop = 0; // Scroll to top on page change
+                    observeElements(newPage);
                 }
-            };
+                
+                homePage.style.display = 'none';
+                currentPage = 'artist';
+                window.location.hash = artists[index].id;
+            });
+        }
+        
+        function changeArtist(direction) {
+            if (isTransitioning) return;
+            let newIndex = currentArtistIndex + direction;
+            if (newIndex >= artists.length) {
+                newIndex = 0;
+            } else if (newIndex < 0) {
+                newIndex = artists.length - 1;
+            }
+            showArtistPage(newIndex);
+        }
 
-            terminalInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    const command = terminalInput.value.trim();
-                    if (command) {
-                        printToTerminal(command, true);
-                        executeCommand(command);
-                        terminalInput.value = '';
-                    }
+        // --- INTERACTIVITY ---
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
                 }
             });
-            
-            // Welcome message in terminal
-            printToTerminal('ARCHIVE435 Terminal v1.0');
-            printToTerminal('Type "help" to see available commands.');
-
-            // Click on terminal to focus input
-            terminal.addEventListener('click', () => {
-                terminalInput.focus();
+        }, { threshold: 0.1 });
+        
+        function observeElements(page) {
+            const elements = page.querySelectorAll('.scroll-animate');
+            elements.forEach(el => {
+                el.classList.remove('visible');
+                observer.observe(el);
             });
+        }
+
+        let touchstartX = 0;
+        let touchendX = 0;
+
+        function handleGesture() {
+            if (currentPage !== 'artist') return;
+            const swipeThreshold = 50;
+            if (touchendX < touchstartX - swipeThreshold) {
+                changeArtist(1);
+            }
+            if (touchendX > touchstartX + swipeThreshold) {
+                changeArtist(-1);
+            }
+        }
+
+        document.addEventListener('touchstart', e => {
+            touchstartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', e => {
+            touchendX = e.changedTouches[0].screenX;
+            handleGesture();
         });
+
+        // --- INITIALIZATION ---
+        function init() {
+            renderHomePage();
+            renderArtistPages();
+            
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                const initialArtistIndex = artists.findIndex(a => a.id === hash);
+                if (initialArtistIndex !== -1) {
+                    currentArtistIndex = initialArtistIndex;
+                    const newPage = document.getElementById(`artist-${artists[initialArtistIndex].id}`);
+                    newPage.classList.add('active');
+                    observeElements(newPage);
+                    homePage.style.display = 'none';
+                    currentPage = 'artist';
+                }
+            }
+        }
+
+        init();
+    });
     </script>
 </body>
 </html>
