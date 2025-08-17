@@ -7,9 +7,280 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        /* Base styling for the body */
+        body {
+            background-color: #0a0a0a;
+            color: #00ff00;
+            font-family: 'VT323', monospace;
+            overflow-x: hidden;
+            /* CRT scanline effect */
+            position: relative;
+        }
+
+        body::after {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            animation: flicker 0.15s infinite;
+        }
+        
+        /* Flicker animation for CRT effect */
+        @keyframes flicker {
+          0% { opacity: 0.27861; }
+          5% { opacity: 0.34769; }
+          10% { opacity: 0.23604; }
+          15% { opacity: 0.90626; }
+          20% { opacity: 0.18128; }
+          25% { opacity: 0.83891; }
+          30% { opacity: 0.65583; }
+          35% { opacity: 0.67807; }
+          40% { opacity: 0.26559; }
+          45% { opacity: 0.84693; }
+          50% { opacity: 0.96019; }
+          55% { opacity: 0.08594; }
+          60% { opacity: 0.20313; }
+          65% { opacity: 0.71988; }
+          70% { opacity: 0.53455; }
+          75% { opacity: 0.37288; }
+          80% { opacity: 0.71428; }
+          85% { opacity: 0.70419; }
+          90% { opacity: 0.7003; }
+          95% { opacity: 0.36108; }
+          100% { opacity: 0.24387; }
+        }
+
+        /* Glitch effect for text */
+        .glitch {
+            animation: glitch 1.5s linear infinite;
+            position: relative;
+        }
+
+        @keyframes glitch {
+            2%, 64% {
+                transform: translate(2px, 0) skew(0deg);
+            }
+            4%, 60% {
+                transform: translate(-2px, 0) skew(0deg);
+            }
+            62% {
+                transform: translate(0, 0) skew(5deg);
+            }
+        }
+
+        .glitch:before,
+        .glitch:after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0a;
+        }
+
+        .glitch:before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00c1;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+
+        .glitch:after {
+            left: -2px;
+            text-shadow: -2px 0 #00fff9, 2px 2px #ff00c1;
+            clip: rect(85px, 450px, 90px, 0);
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+        
+        @keyframes glitch-anim {
+          0% { clip: rect(42px, 9999px, 44px, 0); transform: skew(0.3deg); }
+          5% { clip: rect(17px, 9999px, 96px, 0); }
+          10% { clip: rect(40px, 9999px, 66px, 0); }
+          /* ... (more steps for a complex animation) ... */
+          100% { clip: rect(42px, 9999px, 44px, 0); transform: skew(0.3deg); }
+        }
+
+        @keyframes glitch-anim-2 {
+          0% { clip: rect(2px, 9999px, 99px, 0); transform: skew(0.2deg); }
+          /* ... (more steps for a complex animation) ... */
+          100% { clip: rect(2px, 9999px, 99px, 0); transform: skew(0.2deg); }
+        }
+        
+        /* Styling for the artist links */
+        .artist-link {
+            border-image-slice: 2;
+            border-image-width: 2;
+            border-image-repeat: stretch;
+            border-image-source: url('data:image/svg+xml;utf8,<?xml version="1.0" encoding="UTF-8" ?><svg version="1.1" width="5" height="5" xmlns="http://www.w3.org/2000/svg"><path d="M2 1 h1 v1 h-1 z M1 2 h1 v1 h-1 z M3 2 h1 v1 h-1 z M2 3 h1 v1 h-1 z" fill="rgb(0,255,0)" /></svg>');
+            border-image-outset: 2;
+            position: relative;
+            display: inline-block;
+            padding: 15px 25px;
+            margin: 1rem;
+            color: #00ff00;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-decoration: none;
+            font-size: 24px;
+            overflow: hidden;
+            transition: 0.2s;
+        }
+
+        .artist-link:hover {
+            color: #0a0a0a;
+            background: #00ff00;
+            box-shadow: 0 0 10px #00ff00, 0 0 40px #00ff00, 0 0 80px #00ff00;
+            transition-delay: 1s;
+        }
+        
+        /* Animated border effect on hover */
+        .artist-link span {
+            position: absolute;
+            display: block;
+        }
+
+        .artist-link span:nth-child(1) {
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff00);
+        }
+
+        .artist-link:hover span:nth-child(1) {
+            left: 100%;
+            transition: 1s;
+        }
+
+        .artist-link span:nth-child(3) {
+            bottom: 0;
+            right: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(270deg, transparent, #00ff00);
+        }
+
+        .artist-link:hover span:nth-child(3) {
+            right: 100%;
+            transition: 1s;
+            transition-delay: 0.5s;
+        }
+
+        .artist-link span:nth-child(2) {
+            top: -100%;
+            right: 0;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(180deg, transparent, #00ff00);
+        }
+
+        .artist-link:hover span:nth-child(2) {
+            top: 100%;
+            transition: 1s;
+            transition-delay: 0.25s;
+        }
+
+        .artist-link span:nth-child(4) {
+            bottom: -100%;
+            left: 0;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(360deg, transparent, #00ff00);
+        }
+
+        .artist-link:hover span:nth-child(4) {
+            bottom: 100%;
+            transition: 1s;
+            transition-delay: 0.75s;
+        }
+        
+        /* Terminal-like footer */
+        .footer-terminal {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            color: #33ff33;
+            text-shadow: 0 0 5px #33ff33;
+        }
+        
+        .footer-terminal::before {
+            content: 'root@archive435:~# ';
+            color: #ff3333;
+        }
+        
+        .blinking-cursor {
+            animation: blink 1s step-end infinite;
+        }
+        
+        @keyframes blink {
+            from, to {
+                color: transparent;
+            }
+            50% {
+                color: #33ff33;
+            }
+        }
+
+    </style>
 </head>
-<body class="bg-black">
-work in progress
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+
+    <!-- Main container for the content -->
+    <div class="w-full max-w-md text-center">
+
+        <!-- Header with glitch effect -->
+        <header class="mb-12">
+            <h1 class="text-5xl md:text-6xl font-bold glitch" data-text="ARCHIVE435">ARCHIVE435</h1>
+            <p class="text-lg text-cyan-400 mt-2" style="text-shadow: 0 0 5px #00fff9;">// LOCAL ARTIST DATA STREAM //</p>
+        </header>
+
+        <!-- Navigation with artist links -->
+        <nav class="flex flex-col items-center">
+            <a href="#" class="artist-link">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                ARVISO
+            </a>
+            <a href="#" class="artist-link">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                GR23VY
+            </a>
+            <a href="#" class="artist-link">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                ORION DRIFT
+            </a>
+            <a href="#" class="artist-link">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                IZZY FELZ
+            </a>
+        </nav>
+
+    </div>
+    
+    <!-- Footer with terminal-like text -->
+    <footer class="absolute bottom-4 left-4 footer-terminal">
+        <span>CONNECTION ESTABLISHED... STATUS: SECURE</span><span class="blinking-cursor">_</span>
+    </footer>
+
 </body>
 </html>
